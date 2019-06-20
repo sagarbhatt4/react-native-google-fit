@@ -28,6 +28,8 @@ declare module "react-native-google-fit" {
          */
         getDailyStepCountSamples: (options: any, callback: ((isError: boolean, result: any) => void)) => void;
 
+        getDailyHalfHourData: (options: any, callback: ((isError: boolean, result: any) => void)) => void;
+
         buildDailySteps(steps: any): { date: any, value: any }[];
 
         /**
