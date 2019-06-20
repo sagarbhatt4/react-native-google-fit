@@ -32,6 +32,7 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     private ReactContext mReactContext;
     private GoogleFitManager mGoogleFitManager = null;
     private String GOOGLE_FIT_APP_URI = "com.google.android.apps.fitness";
+    private String TAG = "GoogleFitModule";
 
     public GoogleFitModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -115,7 +116,24 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
                                          Callback successCallback) {
 
         try {
+            Log.e(TAG,"startDate: "+startDate);
+            Log.e(TAG,"endDate: "+endDate);
             successCallback.invoke(mGoogleFitManager.getStepHistory().aggregateDataByDate((long) startDate, (long) endDate));
+        } catch (IllegalViewOperationException e) {
+            errorCallback.invoke(e.getMessage());
+        }
+    }
+
+    @ReactMethod
+    public void getDailyHalfHourData(double startDate,
+                                         double endDate,
+                                         Callback errorCallback,
+                                         Callback successCallback) {
+
+        try {
+            Log.e(TAG,"getDailyHalfHourData startDate: "+startDate);
+            Log.e(TAG,"getDailyHalfHourData endDate: "+endDate);
+            successCallback.invoke(mGoogleFitManager.getStepHistory().aggregateDataByHalfHour((long) startDate, (long) endDate));
         } catch (IllegalViewOperationException e) {
             errorCallback.invoke(e.getMessage());
         }
