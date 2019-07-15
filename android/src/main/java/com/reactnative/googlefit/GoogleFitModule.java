@@ -140,6 +140,21 @@ public class GoogleFitModule extends ReactContextBaseJavaModule implements Lifec
     }
 
     @ReactMethod
+    public void getDailyHourData(double startDate,
+                                     double endDate,
+                                     Callback errorCallback,
+                                     Callback successCallback) {
+
+        try {
+            Log.e(TAG,"getDailyHalfHourData startDate: "+startDate);
+            Log.e(TAG,"getDailyHalfHourData endDate: "+endDate);
+            successCallback.invoke(mGoogleFitManager.getStepHistory().aggregateDataByHour((long) startDate, (long) endDate));
+        } catch (IllegalViewOperationException e) {
+            errorCallback.invoke(e.getMessage());
+        }
+    }
+
+    @ReactMethod
     public void getActivitySamples(double startDate,
                                    double endDate,
                                    Callback errorCallback,

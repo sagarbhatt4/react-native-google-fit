@@ -101,6 +101,27 @@ class RNGoogleFit {
         );
     }
 
+    getDailyHourData = (options, callback) => {
+        let startDate = options.startDate != undefined ? Date.parse(options.startDate) : (new Date()).setHours(0, 0, 0, 0);
+        let endDate = options.endDate != undefined ? Date.parse(options.endDate) : (new Date()).valueOf();
+        googleFit.getDailyHourData(startDate, endDate,
+            msg => callback(msg, false),
+            (res) => {
+                if (res.length > 0) {
+                    callback(false, res.map(function (dev) {
+                            let obj = {};
+                            obj.source = dev.source.appPackage + ((dev.source.stream) ? ":" + dev.source.stream : "");
+                            obj.steps = dev.steps;
+                            return obj;
+                        }, this)
+                    );
+                } else {
+                    callback("There is no any steps data for this period", false);
+                }
+            }
+        );
+    }
+
     buildDailySteps(steps) {
         let results = {};
         for (let step of steps) {

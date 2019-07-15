@@ -371,6 +371,165 @@ public class StepHistory {
         return results;
     }
 
+
+    //Get hourly Data
+    public ReadableArray aggregateDataByHour(long startTime, long endTime) {
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        dateFormat.setTimeZone(TimeZone.getDefault());
+
+        Log.i(TAG, "aggregateDataByHalfHour Range Start: " + dateFormat.format(startTime));
+        Log.i(TAG, "aggregateDataByHalfHour Range End: " + dateFormat.format(endTime));
+
+        WritableArray results = Arguments.createArray();
+
+
+        List<DataSource> dataSources = new ArrayList<>();
+
+        dataSources.add(new DataSource.Builder()
+                .setAppPackageName("com.google.android.gms")
+                .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                .setType(DataSource.TYPE_DERIVED)
+                .setStreamName("estimated_steps")
+                .build());
+
+        // GoogleFit Apps
+        /*dataSources.add(
+                new DataSource.Builder()
+                        .setAppPackageName("com.google.android.gms")
+                        .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
+                        .setType(DataSource.TYPE_DERIVED)
+                        .setStreamName("estimated_steps")
+                        .build()
+        );*/
+
+
+        /*
+        DataSourcesRequest sourceRequest = new DataSourcesRequest.Builder()
+                .setDataTypes(DataType.TYPE_STEP_COUNT_DELTA,
+                    DataType.TYPE_STEP_COUNT_CUMULATIVE,
+                    DataType.AGGREGATE_STEP_COUNT_DELTA
+                    )
+                //.setDataSourceTypes(DataSource.TYPE_DERIVED)
+                .build();
+        DataSourcesResult dataSourcesResult =
+           Fitness.SensorsApi.findDataSources(googleFitManager.getGoogleApiClient(), sourceRequest).await(1, TimeUnit.MINUTES);
+
+        dataSources.addAll( dataSourcesResult.getDataSources() );
+        */
+
+        for (DataSource dataSource : dataSources) {
+            WritableMap source = Arguments.createMap();
+
+            DataType type = dataSource.getDataType();
+            Device device = dataSource.getDevice();
+
+            /*Log.i(TAG, "DataSource:");
+
+            Log.i(TAG, "  + StreamID  : " + dataSource.getStreamIdentifier());
+            source.putString("id", dataSource.getStreamIdentifier());*/
+
+            if (dataSource.getAppPackageName() != null) {
+                source.putString("appPackage", dataSource.getAppPackageName());
+            } else {
+                source.putNull("appPackage");
+            }
+
+            if (dataSource.getName() != null) {
+                source.putString("name", dataSource.getName());
+            } else {
+                source.putNull("name");
+            }
+
+            if (dataSource.getStreamName() != null) {
+                source.putString("stream", dataSource.getStreamName());
+            } else {
+                source.putNull("stream");
+            }
+
+            Log.i(TAG, "  + Type      : " + type);
+            source.putString("type", type.getName());
+
+            Log.i(TAG, "  + Device    : " + device);
+            if (device != null) {
+                source.putString("deviceManufacturer", device.getManufacturer());
+                source.putString("deviceModel", device.getModel());
+                switch(device.getType()) {
+                    case Device.TYPE_CHEST_STRAP:
+                        source.putString("deviceType", "chestStrap"); break;
+                }
+            } else {
+                source.putNull("deviceManufacturer");
+                source.putNull("deviceModel");
+                source.putNull("deviceType");
+            }
+
+            //if (!DataType.TYPE_STEP_COUNT_DELTA.equals(type)) continue;
+            DataReadRequest readRequest;
+
+            List<DataType> aggregateDataTypeList = DataType.getAggregatesForInput(type);
+            if (aggregateDataTypeList.size() > 0) {
+                Log.e(TAG,"aggregateDataTypeList found");
+                DataType aggregateType = aggregateDataTypeList.get(0);
+                Log.w(TAG, "  + Aggregate Type : " + aggregateType);
+
+                //Check how many steps were walked and recorded in specified days
+                readRequest = new DataReadRequest.Builder()
+                        .aggregate(dataSource
+                                //DataType.TYPE_STEP_COUNT_DELTA
+                                ,
+                                //DataType.AGGREGATE_STEP_COUNT_DELTA
+                                aggregateType)
+                        .bucketByTime(30, TimeUnit.MINUTES) // Half-day resolution
+                        .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                        .build();
+            } else {
+                Log.e(TAG,"aggregateDataTypeList not found");
+                readRequest = new DataReadRequest.Builder()
+                        .read(dataSource)
+                        .bucketByTime(60, TimeUnit.MINUTES)
+                        //.bucketByTime(12, TimeUnit.HOURS) // Half-day resolution
+                        .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                        .build();
+            }
+
+            DataReadResult dataReadResult = Fitness.HistoryApi.readData(googleFitManager.getGoogleApiClient(), readRequest).await(1, TimeUnit.MINUTES);
+
+            WritableArray steps = Arguments.createArray();
+
+            //Used for aggregated data
+            if (dataReadResult.getBuckets().size() > 0) {
+                Log.i(TAG, "  +++ Number of buckets: " + dataReadResult.getBuckets().size());
+                for (Bucket bucket : dataReadResult.getBuckets()) {
+                    List<DataSet> dataSets = bucket.getDataSets();
+                    for (DataSet dataSet : dataSets) {
+                        processHalfHourDataSet(dataSet, steps);
+                    }
+                }
+            }
+
+            //Used for non-aggregated data
+            if (dataReadResult.getDataSets().size() > 0) {
+                Log.i(TAG, "  +++ Number of returned DataSets: " + dataReadResult.getDataSets().size());
+                for (DataSet dataSet : dataReadResult.getDataSets()) {
+                    processDataSet(dataSet, steps);
+                }
+            }
+
+            WritableMap map = Arguments.createMap();
+            map.putMap("source", source);
+            map.putArray("steps", steps);
+            results.pushMap(map);
+
+            Log.e("result map",results.toString());
+        }
+
+
+
+        return results;
+    }
+    //End
+
     //Will be deprecated in future releases
     public void displayLastWeeksData(long startTime, long endTime) {
         DateFormat dateFormat = DateFormat.getDateInstance();
