@@ -70,15 +70,31 @@ A React Native bridge module for interacting with Google Fit
      .catch((err) => {console.warn(err)})
     ```
 
-**Response:**
-
-```javascript
-[
-  { source: "com.google.android.gms:estimated_steps", steps: [] },
-  { source: "com.google.android.gms:merge_step_deltas", steps: [] },
-  { source: "com.xiaomi.hm.health", steps: [] }
-];
-```
+    **Response:**
+    
+    ```javascript
+    [
+      { source: "com.google.android.gms:estimated_steps", steps: [
+        {
+          "date":"2019-06-29","value":2328
+        },
+        {
+          "date":"2019-06-30","value":8010
+          }
+        ]
+      },
+      { source: "com.google.android.gms:merge_step_deltas", steps: [
+        {
+          "date":"2019-06-29","value":2328
+        },
+        {
+          "date":"2019-06-30","value":8010
+          }
+        ]
+      },
+      { source: "com.xiaomi.hm.health", steps: [] }
+    ];
+    ```
 
 4. Retrieve Weights
 
@@ -94,7 +110,28 @@ A React Native bridge module for interacting with Google Fit
       console.log(res);
     });
     ```
+
+    **Response:**
     
+    ```javascript
+    [
+      {
+        "addedBy": "app_package_name",
+        "value":72,
+        "endDate":"2019-06-29T15:02:23.413Z",
+        "startDate":"2019-06-29T15:02:23.413Z",
+        "day":"Sat"
+      },
+      {
+        "addedBy": "app_package_name",
+        "value":72.4000015258789,
+        "endDate":"2019-07-26T08:06:42.903Z",
+        "startDate":"2019-07-26T08:06:42.903Z",
+        "day":"Fri"
+      }
+    ]
+    ```
+
 5. Retrieve Heights
 
     ```javascript
@@ -106,6 +143,20 @@ A React Native bridge module for interacting with Google Fit
     GoogleFit.getHeightSamples(opt, (err, res) => {
       console.log(res);
     });
+    ```
+
+    **Response:**
+
+    ```javascript
+    [
+      {
+        "addedBy": "app_package_name",
+        "value":1.7699999809265137,
+        "endDate":"2019-06-29T15:02:23.409Z",
+        "startDate":"2019-06-29T15:02:23.409Z",
+        "day":"Sat"
+      }
+    ]
     ```
 
 6. Save Weights
@@ -124,17 +175,43 @@ A React Native bridge module for interacting with Google Fit
     
 7. Blood pressure and Heart rate methods (since version 0.8)
     ```javascript
-       const options = {
-         startDate: "2017-01-01T00:00:17.971Z", // required
-         endDate: new Date().toISOString(), // required
-       }
-       const callback = ((error, resoponse) => {
-       
-       })
-       GoogleFit.getHeartRateSamples(options, callback)
-       GoogleFit.getBloodPressureSamples(options, callback)
+    const options = {
+      startDate: "2017-01-01T00:00:17.971Z", // required
+      endDate: new Date().toISOString(), // required
+    }
+    const callback = ((error, response) => {
+      console.log(error, response)
+    });
+
+    GoogleFit.getHeartRateSamples(options, callback)
+    GoogleFit.getBloodPressureSamples(options, callback)
     ```
-    
+
+    **Response:**
+
+    ```javascript
+    // heart rate
+    [
+      {
+        "value":80,
+        "endDate":"2019-07-26T10:19:21.348Z",
+        "startDate":"2019-07-26T10:19:21.348Z",
+        "day":"Fri"
+      }
+    ]
+
+    // blood pressure
+    [
+      {
+        "value":120,
+        "value2":80,
+        "endDate":"2019-07-26T08:39:28.493Z",
+        "startDate":"1970-01-01T00:00:00.000Z",
+        "day":"Thu"
+      }
+    ]
+    ```
+
 8. Get all activities
     ```javascript
       let options = {
@@ -145,7 +222,9 @@ A React Native bridge module for interacting with Google Fit
         console.log(err, res)
       });
     ```
-    response:
+
+      **Response:**
+    
     ```javascript
      [ { 
       sourceName: 'Android',
@@ -182,38 +261,181 @@ A React Native bridge module for interacting with Google Fit
     Note that optional parametrs are not presented in all activities - only where google fit return some results for this field.
     Like no distance for still activity. 
 
-9. Other methods:
+9. Retrieve Calories For Period
+    ```javascript
+      const opt = {
+        startDate: "2017-01-01T00:00:17.971Z", // required
+        endDate: new Date().toISOString(), // required
+        basalCalculation: true, // optional, to calculate or not basalAVG over the week
+      };
+
+      GoogleFit.getDailyCalorieSamples(opt, (err, res) => {
+        console.log(res);
+      });
+    ```
+
+    **Response:**
+    
+    ```javascript
+    [
+      {
+        "calorie":1721.948974609375,
+        "endDate":"2019-06-27T15:13:27.000Z",
+        "startDate":"2019-06-27T15:02:23.409Z",
+        "day":"Thu"
+      },
+      {
+        "calorie":1598.25,
+        "endDate":"2019-06-28T15:13:27.000Z",
+        "startDate":"2019-06-27T15:13:27.000Z",
+        "day":"Thu"
+      }
+    ]
+    ```
+
+10. Retrieve Distance For Period:
+    ```javascript
+      const opt = {
+        startDate: "2017-01-01T00:00:17.971Z", // required
+        endDate: new Date().toISOString(), // required
+      };
+
+      GoogleFit.getDailyDistanceSamples(opt, (err, res) => {
+        console.log(res);
+      });
+    ```
+
+    **Response:**
+    
+    ```javascript
+    [
+      {
+        "distance":2254.958251953125,
+        "endDate":"2019-06-30T15:45:32.987Z",
+        "startDate":"2019-06-29T16:57:01.047Z",
+        "day":"Sat"
+      },
+      {
+        "distance":3020.439453125,
+        "endDate":"2019-07-01T13:08:31.332Z",
+        "startDate":"2019-06-30T16:58:44.818Z",
+        "day":"Sun"
+      }
+    ]
+    ```
+
+11. Retrieve Daily Nutrition Data for Period:
+    ```javascript
+      const opt = {
+        startDate: "2017-01-01T00:00:17.971Z", // required
+        endDate: new Date().toISOString(), // required
+      };
+
+      GoogleFit.getDailyNutritionSamples(opt, (err, res) => {
+        console.log(res);
+      });
+    ```
+
+    **Response:**
+    
+    ```javascript
+    [
+      {
+        "nutrients":{"sugar":14,"sodium":1,"calories":105,"potassium":422},
+        "date":"2019-07-02"
+      },
+      {
+        "nutrients":{"sugar":36,"iron":0,"fat.saturated":3.6000001430511475,"sodium":0.13500000536441803,"fat.total":6,"calories":225,"fat.polyunsaturated":0,"carbs.total":36,"potassium":0.21000000834465027,"cholesterol":0.029999999329447746,"protein":9.299999237060547},
+        "date":"2019-07-25"
+      }
+    ]
+    ```
+
+12. Retrieve Hydration
+
+    You need to add `FITNESS_NUTRITION_READ_WRITE` scope to your authorization to work with hydration.
+    ```javascript
+    const startDate = '2020-01-05T00:00:17.971Z'; // required
+    const endDate = new Date().toISOString(); // required
+
+    oogleFit.getHydrationSamples(startDate, endDate, (err, res) => {
+      console.log(res);
+    });
+    ```
+
+    **Response:**
+
+    ```javascript
+    [
+      {
+        "addedBy": "app_package_name",
+        "date": "2020-02-01T00:00:00.000Z",
+        "waterConsumed": "0.225"
+      },
+      {
+        "addedBy": "app_package_name",
+        "date": "2020-02-02T00:00:00.000Z",
+        "waterConsumed": "0.325"
+      },
+    ]
+    ```
+
+13. Save Hydration
+
+    This method can update hydration data.
+    An app cannot update data inserted by other apps.
+
+    ```javascript
+    const hydrationArray = [
+      {
+        date: Date.parse('2020-02-01'), // required, timestamp
+        waterConsumed: 0.225, // required, hydration data for a 0.225 liter drink of water
+      },
+      {
+        date: Date.parse('2020-02-02'),
+        waterConsumed: 0.325,
+      },
+    ];
+
+    GoogleFit.saveHydration(hydrationArray, (err, res) => {
+      if (err) throw "Cant save data to the Google Fit";
+    });
+    ```
+
+14. Delete Hydration
+
+    An app cannot delete data inserted by other apps.
+    startDate and endDate MUST not be the same.
+
+    ```javascript
+    const options = {
+      startDate: '2020-01-01T12:33:18.873Z', // required, timestamp or ISO8601 string
+      endDate: new Date().toISOString(), // required, timestamp or ISO8601 string
+    };
+
+    GoogleFit.deleteHydration(options, (err, res) => {
+      console.log(res);
+    });
+    ```
+
+15. Other methods:
 
     ```javascript
     observeSteps(callback); // On Step Changed Event
-    
+
     unsubscribeListeners(); // Put into componentWillUnmount() method to prevent leaks
-    /**
-    * {@see getDailyCalorieSamples}
-    * const options = {
-    *         startDate: new Date(2018, 9, 17).valueOf(), // simply outputs the number of milliseconds since the Unix Epoch
-    *         endDate: new Date().now(),
-    *         basalCalculation: false,     
-    * }
-    * method to get calories per day, options object could contain basalCalculation (bool) to calculate or not basalAVG over the week
-    */
-    getDailyCalorieSamples(options, callback);
-    
-    getDailyDistanceSamples(options, callback); // method to get daily distance
-    
+
     isAvailable(callback); // Checks is GoogleFit available for current account / installed on device
     
     isEnabled(callback); // Checks is permissions granted
     
-    deleteWeight(options, callback); // method to delete weights by options (same as in save weights)
+    deleteWeight(options, callback); // method to delete weights by options (same as in delete hydration)
  
     openFit(); //method to open google fit app
     
     saveHeight(options, callback);
  
-    deleteHeight(options, callback);
- 
-    deleteWeight(options, callback);
+    deleteHeight(options, callback); // method to delete heights by options (same as in delete hydration)
  
     disconnect(); // Closes the connection to Google Play services.
     ```

@@ -12,7 +12,7 @@
 package com.reactnative.googlefit;
 
 import android.app.Activity;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
@@ -113,7 +113,7 @@ public class StepCounter implements OnDataPointListener {
                 }
             });*/
 
-            if(type.equals(DataType.TYPE_STEP_COUNT_CUMULATIVE)) {
+            if(type.equals(DataType.TYPE_STEP_COUNT_DELTA)) {
                 WritableMap map = Arguments.createMap();
                 map.putDouble("steps", value.asInt());
                 sendEvent(this.mReactContext, "StepChangedEvent", map);
